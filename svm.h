@@ -38,34 +38,18 @@ public:
                     datafile<<(j+1)<<":"<<features.at(j)<<" ";
                 }
                 datafile<<"\n";
-              //  class_vectors = class_vectors.draw_image(0, i, 0, 0, extract_features(c_iter->second[i].c_str()));
-
 
             }
-        //    cout<<c_iter->second.size()<<endl;
-
-
-         //   class_vectors.save_png(("svm_models/svm_model." + c_iter->first + ".png").c_str());
         }
         datafile.close();
+        system("cd svm_multiclass/");
+        system("make");
+        system("./svm_multiclass_learn -c 100 ../train.dat ../svm_model >../train.txt");
     }
 
     virtual string classify(const string &filename)
     {
-        ofstream datafile;
-        datafile.open("test.dat");
-        vector<double> features = extract_features(filename);
 
-        for(int j=0;j<features.size();j++)
-        {
-            datafile<<(j+1)<<":"<<features.at(j)<<" ";
-        }
-
-        // figure nearest neighbor
-        pair<string, double> best("", 10e100);
-        double this_cost;
-
-        return best.first;
     }
 
     virtual void load_model()
@@ -96,6 +80,8 @@ public:
             }
         }
         datafile.close();
+
+        system("./svm_multiclass_classify ../test.dat svm_model ../output_file.txt >../test.txt ");
 
     }
 
