@@ -113,10 +113,10 @@ int main(int argc, char **argv)
         cout<<endl;
       }
       test.unroll('x');
-      for(int i=0;i<test.height();i++)
+      for(int i=0;i<test.width();i++)
       {
-        for(int j=0;j<test.width();j++)
-          cout<<test(i,j,0,0)<<" ";
+        for(int j=0;j<test.height();j++)
+          cout<<test(j,i,0,0)<<" ";
         cout<<endl;
       }
       for (int i=0;i<oned.size();i++)

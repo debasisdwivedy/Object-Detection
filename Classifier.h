@@ -11,14 +11,17 @@ public:
   // Classify a single image.
   virtual string classify(const string &filename) = 0;
 
+
+
   // Load in a trained model.
   virtual void load_model() = 0;
 
   // Loop through all test images, hiding correct labels and checking if we get them right.
-  void test(const Dataset &filenames)
+  virtual void test(const Dataset &filenames)
   {
     cerr << "Loading model..." << endl;
     load_model();
+
 
     // loop through images, doing classification
     map<string, map<string, string> > predictions;
