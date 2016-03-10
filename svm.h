@@ -49,7 +49,7 @@ public:
 
     virtual string classify(const string &filename)
     {
-
+        return "";
     }
 
     virtual void load_model()
@@ -80,8 +80,11 @@ public:
             }
         }
         datafile.close();
-
-        system("./svm_multiclass_classify ../test.dat svm_model ../output_file.txt >../test.txt ");
+        datafile.close();
+        system("cd svm_multiclass");
+        system("make");
+        system("ls -l >pwd.txt ");
+        system("./svm_multiclass_classify ../test.dat ../svm_model ../output_file.txt >../test.txt ");
 
     }
 
