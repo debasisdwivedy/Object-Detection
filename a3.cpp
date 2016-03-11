@@ -29,6 +29,7 @@
 #include <fstream>
 #include <dirent.h>
 #include <map>
+#include<unistd.h>
 #include <numeric>
 
 //Use the cimg namespace to access the functions easily

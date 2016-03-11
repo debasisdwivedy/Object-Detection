@@ -42,7 +42,8 @@ public:
             }
         }
         datafile.close();
-        system("cd svm_multiclass/");
+      //  system("cd svm_multiclass/");
+        chdir("svm_multiclass/");
         system("make");
         system("./svm_multiclass_learn -c 100 ../train.dat ../svm_model >../train.txt");
     }
@@ -81,10 +82,12 @@ public:
         }
         datafile.close();
         datafile.close();
-        system("cd svm_multiclass");
+        chdir("svm_multiclass/");
+     //   system("cd svm_multiclass");
         system("make");
-        system("ls -l >pwd.txt ");
+      //  system("ls -l >pwd.txt ");
         system("./svm_multiclass_classify ../test.dat ../svm_model ../output_file.txt >../test.txt ");
+        cout << ifstream("test.txt").rdbuf();
 
     }
 
