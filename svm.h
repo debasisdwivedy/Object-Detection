@@ -17,42 +17,48 @@ public:
     // them to a common size, convert to greyscale, and dump them as vectors to a file
     virtual void train(const Dataset &filenames)
     {
-        ofstream datafile;
-        datafile.open("train.dat");
 
-        for(Dataset::const_iterator c_iter=filenames.begin(); c_iter != filenames.end(); ++c_iter)
+        if(!fexists("train.dat"))
         {
-            cout << "SVM: Processing " << c_iter->first << endl;
-           // CImg<double> class_vectors(size*size, filenames.size(), 1);
-
-
-            // convert each image to be a row of this "model" image
-            int target=distance(filenames.begin(), c_iter)+1;
-
-            for(int i=0; i<c_iter->second.size(); i++)
+            ofstream datafile;
+            datafile.open("train.dat");
+            for(Dataset::const_iterator c_iter=filenames.begin(); c_iter != filenames.end(); ++c_iter)
             {
-                vector<double> features=extract_features(c_iter->second[i].c_str());
-                datafile<<target<<" ";
-                for(int j=0;j<features.size();j++)
+                cout << "SVM: Processing " << c_iter->first << endl;
+                // CImg<double> class_vectors(size*size, filenames.size(), 1);
+
+
+                // convert each image to be a row of this "model" image
+                int target=distance(filenames.begin(), c_iter)+1;
+
+                for(int i=0; i<c_iter->second.size(); i++)
                 {
-                    datafile<<(j+1)<<":"<<features.at(j)<<" ";
+                    vector<double> features=extract_features(c_iter->second[i].c_str());
+                    datafile<<target<<" ";
+                    for(int j=0;j<features.size();j++)
+                    {
+                        datafile<<(j+1)<<":"<<features.at(j)<<" ";
+                    }
+                    datafile<<"\n";
+
                 }
-                datafile<<"\n";
 
             }
+            datafile.close();
 
         }
-        datafile.close();
+
+
       //  system("cd svm_multiclass/");
         chdir("svm_multiclass/");
         system("make");
-        system("./svm_multiclass_learn -c 100 ../train.dat ../svm_model >../train.txt");
+        system("./svm_multiclass_learn -c 50 t 2 ../train.dat ../svm_model >../train.txt");
     }
 
     virtual string classify(const string &filename)
     {
 
-        cout<<"In Classification"<<endl;
+     //   cout<<"In Classification"<<endl;
         ofstream datafile;
         datafile.open("test.dat");
         vector<double> features = extract_features(filename);
@@ -177,6 +183,10 @@ protected:
     {
         return value/255.0;
 
+    }
+    bool fexists(const char *filename) {
+        ifstream ifile(filename);
+        return ifile;
     }
     static const int size=20;  // subsampled image resolution
     static const int grayscale=1;  // Test with Grayscale and Color
