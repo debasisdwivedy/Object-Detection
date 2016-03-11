@@ -11,6 +11,8 @@ public:
   // Classify a single image.
   virtual string classify(const string &filename) = 0;
 
+
+
   // Load in a trained model.
   virtual void load_model() = 0;
 
@@ -19,6 +21,7 @@ public:
   {
     cerr << "Loading model..." << endl;
     load_model();
+
 
     // loop through images, doing classification
     map<string, map<string, string> > predictions;

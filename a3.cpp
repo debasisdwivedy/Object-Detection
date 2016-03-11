@@ -26,8 +26,10 @@
 #include <vector>
 #include <Sift.h>
 #include <sys/types.h>
+#include <fstream>
 #include <dirent.h>
 #include <map>
+#include<unistd.h>
 #include <numeric>
 
 //Use the cimg namespace to access the functions easily
@@ -37,9 +39,14 @@ using namespace std;
 // Dataset data structure, set up so that e.g. dataset["bagel"][3] is
 // filename of 4th bagel image in the dataset
 typedef map<string, vector<string> > Dataset;
+string directory_name="";
+
+void call_svm(Dataset filenames);
+
 
 #include <Classifier.h>
 #include <NearestNeighbor.h>
+#include <svm.h>
 
 // Figure out a list of files in a given directory.
 //
@@ -78,7 +85,50 @@ int main(int argc, char **argv)
     // set up the classifier based on the requested algo
     Classifier *classifier=0;
     if(algo == "nn")
+    {
       classifier = new NearestNeighbor(class_list);
+
+
+    }
+    else if (algo=="svm")
+    {
+        classifier=new SVM(class_list);
+
+    }
+    else if(algo=="test")
+    {
+      CImg<double > test("test.jpg");
+      vector<double> oned;
+      cout<<test.spectrum()<<endl;
+      test.resize(8,8,1,1);
+      test.save("resized.png");
+      for(int i=0;i<test.height();i++)
+      {
+        for(int j=0;j<test.width();j++)
+        {
+          cout<<test(i,j,0,0)<<" ";
+          oned.push_back(test(i,j,0,0));
+
+        }
+
+        cout<<endl;
+      }
+      test.unroll('x');
+      for(int i=0;i<test.width();i++)
+      {
+        for(int j=0;j<test.height();j++)
+          cout<<test(j,i,0,0)<<" ";
+        cout<<endl;
+      }
+      for (int i=0;i<oned.size();i++)
+      {
+        cout<<oned.at(i)<<" ";
+      }
+      cout<<endl;
+
+
+
+    }
     else
       throw std::string("unknown classifier " + algo);
 
@@ -89,10 +139,21 @@ int main(int argc, char **argv)
       classifier->test(filenames);
     else
       throw std::string("unknown mode!");
+
   }
   catch(const string &err) {
     cerr << "Error: " << err << endl;
   }
+}
+
+
+void call_svm(Dataset filenames)
+{
+  for(Dataset::const_iterator c_iter=filenames.begin(); c_iter != filenames.end(); ++c_iter) {
+    cout << "Processing " << c_iter->first << endl;
+  }
+  system("ls -l >test.txt"); // execute the UNIX command "ls -l >test.txt"
+ // cout << ifstream("test.txt").rdbuf();
 }
 
 
