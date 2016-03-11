@@ -40,6 +40,7 @@ public:
                 datafile<<"\n";
 
             }
+
         }
         datafile.close();
       //  system("cd svm_multiclass/");
@@ -50,7 +51,40 @@ public:
 
     virtual string classify(const string &filename)
     {
-        return "";
+
+        cout<<"In Classification"<<endl;
+        ofstream datafile;
+        datafile.open("test.dat");
+        vector<double> features = extract_features(filename);
+        datafile<<"1 ";
+        for(int j=0;j<features.size();j++)
+        {
+            datafile<<(j+1)<<":"<<features.at(j)<<" ";
+        }
+        datafile<<"\n";
+        datafile.close();
+
+        chdir("svm_multiclass/");
+        //   system("cd svm_multiclass");
+        system("make > garbage.txt");
+        //  system("ls -l >pwd.txt ");
+        system("./svm_multiclass_classify ../test.dat ../svm_model ../test_output.txt >../test.txt ");
+        chdir ("../");
+
+        string str;
+        string output_label;
+        ifstream outputfile("test_output.txt");
+        while (std::getline(outputfile, str))
+        {
+            int index=str.find(" ");
+            int c_index=stoi(str.substr(0,index));
+           // cout<<class_list[c_index-1]<<endl;
+            output_label=class_list[c_index-1];
+            //cout<<str<<endl;
+        }
+
+        return output_label;
+
     }
 
     virtual void load_model()
@@ -58,7 +92,7 @@ public:
         return;
 
     }
-    virtual void test(const Dataset &filenames)
+ /*   virtual void test(const Dataset &filenames)
     {
         cout<<"In SVM test "<<endl;
         ofstream datafile;
@@ -79,6 +113,7 @@ public:
                 }
                 datafile<<"\n";
             }
+
         }
         datafile.close();
         datafile.close();
@@ -87,9 +122,21 @@ public:
         system("make");
       //  system("ls -l >pwd.txt ");
         system("./svm_multiclass_classify ../test.dat ../svm_model ../output_file.txt >../test.txt ");
+
+        chdir("../");
         cout << ifstream("test.txt").rdbuf();
 
-    }
+        string str;
+        ifstream outputfile("output_file.txt");
+        while (std::getline(outputfile, str))
+        {
+            int index=str.find(" ");
+            int c_index=stoi(str.substr(0,index));
+            cout<<class_list[c_index-1]<<endl;
+        }
+
+
+    }*/
 
 
 
@@ -134,4 +181,5 @@ protected:
     static const int size=20;  // subsampled image resolution
     static const int grayscale=1;  // Test with Grayscale and Color
     map<string, CImg<double> > models; // trained models
+    vector<double> classes;
 };

@@ -17,7 +17,7 @@ public:
   virtual void load_model() = 0;
 
   // Loop through all test images, hiding correct labels and checking if we get them right.
-  virtual void test(const Dataset &filenames)
+  void test(const Dataset &filenames)
   {
     cerr << "Loading model..." << endl;
     load_model();
