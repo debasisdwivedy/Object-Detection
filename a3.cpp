@@ -90,21 +90,29 @@ int main(int argc, char **argv)
 
 
     }
-    else if (algo=="svm")
+    else if (algo=="baseline")
     {
-        classifier=new SVM(class_list);
+        classifier=new SVM(class_list,0);
+
+    }
+    else if (algo=="haar")
+    {
+      classifier=new SVM(class_list,2);
 
     }
     else if(algo=="test")
     {
       CImg<double > test("test.jpg");
+      CImg<double > s(4,4,1,1);
+      CImg<double > ii(4,4,1,1);
       vector<double> oned;
       cout<<test.spectrum()<<endl;
-      test.resize(8,8,1,1);
+      test.resize(4,4,1,1);
       test.save("resized.png");
-      for(int i=0;i<test.height();i++)
+
+      for(int i=0;i<test.width();i++)
       {
-        for(int j=0;j<test.width();j++)
+        for(int j=0;j<test.height();j++)
         {
           cout<<test(i,j,0,0)<<" ";
           oned.push_back(test(i,j,0,0));
@@ -113,13 +121,38 @@ int main(int argc, char **argv)
 
         cout<<endl;
       }
+
+      cout<<"Integral Image"<<endl;
+      for(int x=0;x<test.width();x++)
+      {
+        for(int y=0;y<test.height();y++)
+        {
+
+          if(y>0)
+            s(x,y,0,0)=s(x,y-1,0,0)+test(x,y,0,0);
+          else
+            s(x,y,0,0)=0+test(x,y,0,0);
+
+          if (x>0)
+            ii(x,y,0,0)=s(x,y,0,0)+ii(x-1,y,0,0);
+          else
+            ii(x,y,0,0)=s(x,y,0,0);
+          cout<<ii(x,y,0,0)<<" ";
+
+        }
+
+        cout<<endl;
+      }
+
+
+
       test.unroll('x');
-      for(int i=0;i<test.width();i++)
+    /*  for(int i=0;i<test.width();i++)
       {
         for(int j=0;j<test.height();j++)
           cout<<test(j,i,0,0)<<" ";
         cout<<endl;
-      }
+      }*/
       for (int i=0;i<oned.size();i++)
       {
         cout<<oned.at(i)<<" ";
