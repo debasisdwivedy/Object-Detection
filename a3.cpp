@@ -47,6 +47,7 @@ void call_svm(Dataset filenames);
 #include <Classifier.h>
 #include <NearestNeighbor.h>
 #include <svm.h>
+#include <bow.h>
 
 // Figure out a list of files in a given directory.
 //
@@ -88,7 +89,6 @@ int main(int argc, char **argv)
     {
       classifier = new NearestNeighbor(class_list);
 
-
     }
     else if (algo=="baseline")
     {
@@ -98,6 +98,11 @@ int main(int argc, char **argv)
     else if (algo=="haar")
     {
       classifier=new SVM(class_list,2);
+
+    }
+    else if (algo=="bow")
+    {
+      classifier = new BOW(class_list);
 
     }
     else if(algo=="test")
