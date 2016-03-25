@@ -85,7 +85,9 @@ public:
         while (std::getline(outputfile, str))
         {
             int index=str.find(" ");
-            int c_index=stoi(str.substr(0,index));
+	     string s=str.substr(0,index);
+            int c_index=atoi(s.c_str());
+            //int c_index=stoi(str.substr(0,index));
            // cout<<class_list[c_index-1]<<endl;
             output_label=class_list[c_index-1];
             //cout<<str<<endl;
@@ -151,7 +153,17 @@ public:
 protected:
     // extract features from an image, which in this case just involves resampling and
     // rearranging into a vector of pixel data.
-
+    vector<double> deep_features(const string &filename)
+    {
+        vector<double>  feature_vector;
+        cout<< filename<<endl;
+        string command="./overfeat/bin/linux_64/overfeat -f "+filename+" > deep_features.txt";
+        cout<<command<<endl;
+	system(command.c_str());
+        
+       return feature_vector; 
+        
+    }
 
 
     vector<double> haar_features(CImg<double> image)
@@ -249,6 +261,10 @@ protected:
         if (feature_type==2)
         {
             feature_vector=haar_features(image);
+        }
+	else if (feature_type==4)
+        {
+            feature_vector=deep_features(filename);
         }
         else
         {

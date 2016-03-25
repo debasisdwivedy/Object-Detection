@@ -100,6 +100,14 @@ int main(int argc, char **argv)
       classifier=new SVM(class_list,2);
 
     }
+    else if(algo=="deep")
+    {
+	cout<<"Downloading data"<<endl;
+	chdir("overfeat/");
+        system("python download_weights.py >garbage.txt");
+        chdir("../");
+ 	classifier=new SVM(class_list,4);
+    }
     else if(algo=="test")
     {
       CImg<double > test("test.jpg");
