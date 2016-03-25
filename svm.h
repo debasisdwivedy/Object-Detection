@@ -197,6 +197,7 @@ protected:
         // Feature Generation
         for(int i=0;i<no_of_features;i++)
         {
+
             int which_feature = rand() % 5;
             int size_x = feature[which_feature][0];
             int size_y = feature[which_feature][1];
