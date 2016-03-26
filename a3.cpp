@@ -42,13 +42,11 @@ typedef map<string, vector<string> > Dataset;
 string directory_name="";
 
 void call_svm(Dataset filenames);
-
-
 #include <Classifier.h>
 #include <NearestNeighbor.h>
 #include <svm.h>
 #include <bow.h>
-
+#include <eigen.h>
 // Figure out a list of files in a given directory.
 //
 vector<string> files_in_directory(const string &directory, bool prepend_directory = false)
@@ -95,6 +93,60 @@ int main(int argc, char **argv)
         classifier=new SVM(class_list,0);
 
     }
+    
+    else if (algo=="eigen")
+    {
+      vector<string> list_of_images=files_in_directory(mode,true);
+      for(int i=0;i<list_of_images.size();i++)
+      {
+        vector<string> names_of_images=files_in_directory(list_of_images[i],true);
+        eigen_build_db(names_of_images);
+        /* Load mean food from disk and initialize variables */
+        CImg<float> mean( "eigen.mean.bmp" ), food;
+        vector< CImg<float> > foods;
+        eigen_db_t db;
+        float **projections;
+        vector<image_info> trainingset_info;
+        vector<image_info> testingset_info;
+        image_info img;
+        
+        // Read in list of test image filenames and load foods to vector.
+        
+        vector<string> list_of_testing_images=files_in_directory(mode,true);
+        for(int i=0;i<list_of_testing_images.size();i++)
+        {
+          vector<string> names_of_testing_images=files_in_directory(list_of_testing_images[i],true);
+          for(int j=0;j<names_of_testing_images.size();j++)
+          {
+            string path = names_of_testing_images[j];
+            std::size_t found = path.find_last_of("/\\");
+            std::string str=path.substr(found+1,path.length()-1);
+            try {
+              food.load( path.c_str() );
+              foods.push_back( food );
+              img.subject = atoi(str.c_str());
+              testingset_info.push_back( img );
+            } catch (CImgException &e)
+            {
+              fprintf(stderr, "main: failed to load food: %s\n", e.what());
+              continue;
+            }
+          }
+        }
+        
+        
+        /* Load learned system from disk and allocate memory for new structures. */
+        eigen_load_db(&db);
+        eigen_load_info(&trainingset_info, db);
+        projections = eigen_load_vectors(db);
+        float * weights = new float[db.food * db.food];
+        eigen_load_weights(db, weights);
+        float * iweights = new float[db.food * foods.size()];
+        /* Project test images to learned eigen food space to obtain feature vectors. */
+        eigen_build_iweights(foods, mean, projections, db.food, iweights);
+      }
+      
+    }
     else if (algo=="haar")
     {
       classifier=new SVM(class_list,2);
@@ -114,58 +166,58 @@ int main(int argc, char **argv)
       cout<<test.spectrum()<<endl;
       test.resize(4,4,1,1);
       test.save("resized.png");
-
+      
       for(int i=0;i<test.width();i++)
       {
         for(int j=0;j<test.height();j++)
         {
           cout<<test(i,j,0,0)<<" ";
           oned.push_back(test(i,j,0,0));
-
+          
         }
-
+        
         cout<<endl;
       }
-
+      
       cout<<"Integral Image"<<endl;
       for(int x=0;x<test.width();x++)
       {
         for(int y=0;y<test.height();y++)
         {
-
+          
           if(y>0)
             s(x,y,0,0)=s(x,y-1,0,0)+test(x,y,0,0);
           else
             s(x,y,0,0)=0+test(x,y,0,0);
-
+          
           if (x>0)
             ii(x,y,0,0)=s(x,y,0,0)+ii(x-1,y,0,0);
           else
             ii(x,y,0,0)=s(x,y,0,0);
           cout<<ii(x,y,0,0)<<" ";
-
+          
         }
-
+        
         cout<<endl;
       }
-
-
-
+      
+      
+      
       test.unroll('x');
-    /*  for(int i=0;i<test.width();i++)
+      /*  for(int i=0;i<test.width();i++)
       {
-        for(int j=0;j<test.height();j++)
-          cout<<test(j,i,0,0)<<" ";
-        cout<<endl;
+      for(int j=0;j<test.height();j++)
+      cout<<test(j,i,0,0)<<" ";
+      cout<<endl;
       }*/
       for (int i=0;i<oned.size();i++)
       {
         cout<<oned.at(i)<<" ";
       }
       cout<<endl;
-
-
-
+      
+      
+      
     }
     else
       throw std::string("unknown classifier " + algo);
@@ -193,6 +245,7 @@ void call_svm(Dataset filenames)
   system("ls -l >test.txt"); // execute the UNIX command "ls -l >test.txt"
  // cout << ifstream("test.txt").rdbuf();
 }
+
 
 
 

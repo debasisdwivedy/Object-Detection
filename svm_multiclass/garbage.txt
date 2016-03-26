@@ -1,0 +1,14 @@
+cd svm_light; make svm_learn_hideo_noexe
+gcc -c  -O3                      svm_learn_main.c -o svm_learn_main.o 
+gcc -c  -O3                      svm_learn.c -o svm_learn.o 
+gcc -c  -O3                      svm_common.c -o svm_common.o 
+gcc -c  -O3                      svm_hideo.c -o svm_hideo.o 
+cd svm_struct; make svm_struct_noexe
+gcc -c  -O3 -fomit-frame-pointer -ffast-math -Wall  svm_struct_learn.c -o svm_struct_learn.o
+gcc -c  -O3 -fomit-frame-pointer -ffast-math -Wall  svm_struct_classify.c -o svm_struct_classify.o
+gcc -c  -O3 -fomit-frame-pointer -ffast-math -Wall  svm_struct_common.c -o svm_struct_common.o
+gcc -c  -O3 -fomit-frame-pointer -ffast-math -Wall  svm_struct_main.c -o svm_struct_main.o
+gcc -c  -O3 -fomit-frame-pointer -ffast-math -Wall  svm_struct_api.c -o svm_struct_api.o
+gcc -c  -O3 -fomit-frame-pointer -ffast-math -Wall  svm_struct_learn_custom.c -o svm_struct_learn_custom.o
+gcc  -O3 -lm -Wall svm_struct/svm_struct_learn.o svm_struct_learn_custom.o svm_struct_api.o svm_light/svm_hideo.o svm_light/svm_learn.o svm_light/svm_common.o svm_struct/svm_struct_common.o svm_struct/svm_struct_main.o -o svm_multiclass_learn 
+gcc  -O3 -lm -Wall svm_struct_api.o svm_struct/svm_struct_classify.o svm_light/svm_common.o svm_struct/svm_struct_common.o -o svm_multiclass_classify 
