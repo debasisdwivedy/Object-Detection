@@ -167,7 +167,7 @@ protected:
         string str;
         getline(featurefile, str);
 
-        //cout<<str<<endl;
+        cout<<str<<endl;
 
 
 
@@ -195,7 +195,7 @@ protected:
                 ss.ignore();
         }
 
-        //cout<<feature_vector.size()<<endl;
+        cout<<feature_vector.size()<<endl;
 
        // getline(featurefile,str);
      //   cout<<n <<" h: "<<h <<" w: "<<r<<endl;
