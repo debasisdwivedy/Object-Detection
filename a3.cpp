@@ -31,6 +31,7 @@
 #include <map>
 #include<unistd.h>
 #include <numeric>
+#include <sstream>
 
 //Use the cimg namespace to access the functions easily
 using namespace cimg_library;
@@ -87,13 +88,14 @@ int main(int argc, char **argv)
     {
       classifier = new NearestNeighbor(class_list);
 
+
     }
     else if (algo=="baseline")
     {
         classifier=new SVM(class_list,0);
 
     }
-    
+
     else if (algo=="eigen")
     {
       /*
@@ -102,7 +104,7 @@ int main(int argc, char **argv)
       {
         vector<string> names_of_images=files_in_directory(list_of_images[i],true);
         eigen_build_db(names_of_images);
-        // Load mean food from disk and initialize variables 
+        // Load mean food from disk and initialize variables
         CImg<float> mean( "eigen.mean.bmp" ), food;
         vector< CImg<float> > foods;
         eigen_db_t db;
@@ -110,9 +112,9 @@ int main(int argc, char **argv)
         vector<image_info> trainingset_info;
         vector<image_info> testingset_info;
         image_info img;
-        
+
         // Read in list of test image filenames and load foods to vector.
-        
+
         vector<string> list_of_testing_images=files_in_directory(mode,true);
         for(int i=0;i<list_of_testing_images.size();i++)
         {
@@ -134,8 +136,8 @@ int main(int argc, char **argv)
             }
           }
         }
-        
-        
+
+
         // Load learned system from disk and allocate memory for new structures.
         eigen_load_db(&db);
         eigen_load_info(&trainingset_info, db);
@@ -158,6 +160,14 @@ int main(int argc, char **argv)
       classifier = new BOW(class_list);
 
     }
+    else if(algo=="deep")
+    {
+	//cout<<"Downloading data"<<endl;
+	//chdir("overfeat/");
+      //  system("python download_weights.py >garbage.txt");
+       // chdir("../");
+ 	classifier=new SVM(class_list,4);
+    }
     else if(algo=="test")
     {
       CImg<double > test("test.jpg");
@@ -167,58 +177,58 @@ int main(int argc, char **argv)
       cout<<test.spectrum()<<endl;
       test.resize(4,4,1,1);
       test.save("resized.png");
-      
+
       for(int i=0;i<test.width();i++)
       {
         for(int j=0;j<test.height();j++)
         {
           cout<<test(i,j,0,0)<<" ";
           oned.push_back(test(i,j,0,0));
-          
+
         }
-        
+
         cout<<endl;
       }
-      
+
       cout<<"Integral Image"<<endl;
       for(int x=0;x<test.width();x++)
       {
         for(int y=0;y<test.height();y++)
         {
-          
+
           if(y>0)
             s(x,y,0,0)=s(x,y-1,0,0)+test(x,y,0,0);
           else
             s(x,y,0,0)=0+test(x,y,0,0);
-          
+
           if (x>0)
             ii(x,y,0,0)=s(x,y,0,0)+ii(x-1,y,0,0);
           else
             ii(x,y,0,0)=s(x,y,0,0);
           cout<<ii(x,y,0,0)<<" ";
-          
+
         }
-        
+
         cout<<endl;
       }
-      
-      
-      
+
+
+
       test.unroll('x');
-      /*  for(int i=0;i<test.width();i++)
+    /*  for(int i=0;i<test.width();i++)
       {
-      for(int j=0;j<test.height();j++)
-      cout<<test(j,i,0,0)<<" ";
-      cout<<endl;
+        for(int j=0;j<test.height();j++)
+          cout<<test(j,i,0,0)<<" ";
+        cout<<endl;
       }*/
       for (int i=0;i<oned.size();i++)
       {
         cout<<oned.at(i)<<" ";
       }
       cout<<endl;
-      
-      
-      
+
+
+
     }
     else
       throw std::string("unknown classifier " + algo);
@@ -246,7 +256,6 @@ void call_svm(Dataset filenames)
   system("ls -l >test.txt"); // execute the UNIX command "ls -l >test.txt"
  // cout << ifstream("test.txt").rdbuf();
 }
-
 
 
 

@@ -54,7 +54,7 @@ public:
         chdir("svm_multiclass/");
         system("make > garbage.txt ");
 
-        system("./svm_multiclass_learn -c 50 t 2 ../train.dat ../svm_model >../train.txt");
+        system("./svm_multiclass_learn -c 50 ../train.dat ../svm_model >../train.txt");
     }
 
     virtual string classify(const string &filename)
@@ -85,7 +85,9 @@ public:
         while (std::getline(outputfile, str))
         {
             int index=str.find(" ");
-            int c_index=stoi(str.substr(0,index));
+	        string s=str.substr(0,index);
+            int c_index=atoi(s.c_str());
+            //int c_index=stoi(str.substr(0,index));
            // cout<<class_list[c_index-1]<<endl;
             output_label=class_list[c_index-1];
             //cout<<str<<endl;
@@ -151,13 +153,60 @@ public:
 protected:
     // extract features from an image, which in this case just involves resampling and
     // rearranging into a vector of pixel data.
+    vector<double> deep_features(CImg<double> image)
+    {
+        vector<double>  feature_vector;
+        int len=275;
+        image.resize(len,len,1,3);
+        image.save("resized.jpg");
+       // cout<< filename<<endl;
+        string command="./overfeat/bin/linux_64/overfeat -f resized.jpg > deep_features.txt";
+       // cout<<command<<endl;
+	    system(command.c_str());
+        ifstream featurefile("deep_features.txt");
+        string str;
+        getline(featurefile, str);
 
+        cout<<str<<endl;
+
+
+
+        int index=str.find(" ");
+        string s=str.substr(0,index);
+        string rest=str.substr(index+1);
+        int h_index=rest.find(" ");
+        int n=atoi(s.c_str());
+
+        s=rest.substr(0,h_index);
+        int h=atoi(s.c_str());
+        s=rest.substr(h_index+1);
+        int r=atoi(s.c_str());
+
+        getline(featurefile,str);
+        std::stringstream ss(str);
+
+        double value;
+        while (ss >> value)
+        {
+           feature_vector.push_back(value);
+
+
+            if (ss.peek() == ' ')
+                ss.ignore();
+        }
+
+        cout<<feature_vector.size()<<endl;
+
+       // getline(featurefile,str);
+     //   cout<<n <<" h: "<<h <<" w: "<<r<<endl;
+        featurefile.close();
+       return feature_vector; 
+        
+    }
 
 
     vector<double> haar_features(CImg<double> image)
     {
-        //cout<< "Haar Features"<<endl;
-
         // CIMG initialize
         CImg<double> gray_image(image.width(),image.height(),1,1);
         CImg<double> integral_image(image.width(),image.height(),1,1);
@@ -181,7 +230,9 @@ protected:
             gray_image= image.get_RGBtoHSI().get_channel(2);
             image=gray_image;
         }
-        image.normalize(0,255).save("test.jpg");
+        //image.normalize(0,255).save("test.jpg");
+        int haar_size=80;
+        image.resize(haar_size,haar_size,1,3);
 
         for(int x=0;x<image.width();x++)
         {
@@ -193,12 +244,10 @@ protected:
             }
         }
 
-     //   cout<<"Feature Generation"<<endl;
         // Feature Generation
         for(int i=0;i<no_of_features;i++)
         {
             int which_feature = rand() % 5;
-
             int size_x = feature[which_feature][0];
             int size_y = feature[which_feature][1];
 
@@ -210,6 +259,8 @@ protected:
             size_x=size_x*r_size_x;
             size_y=size_y*r_size_y;
             int black=rand()%2; // 0 black, 1 white
+
+            int m=black==0?-1:1;
 
             int pos_x=rand()%(image.width()-size_x-1)+size_x;
             int pos_y=rand()%(image.height()-size_y-1)+size_y;
@@ -226,11 +277,11 @@ protected:
             double feature_value=0;
             if (which_feature==2||which_feature==3)
             {
-                feature_value=2*(filtered_total_sum)/3;
+                feature_value=2*m*(filtered_total_sum)/3;
             }
             else
             {
-                feature_value=filtered_total_sum/2;
+                feature_value=m*filtered_total_sum/2;
             }
             feature_vector.push_back(feature_value);
         }
@@ -251,6 +302,10 @@ protected:
         if (feature_type==2)
         {
             feature_vector=haar_features(image);
+        }
+	else if (feature_type==4)
+        {
+            feature_vector=deep_features(image);
         }
         else
         {
