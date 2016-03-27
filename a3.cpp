@@ -46,7 +46,7 @@ void call_svm(Dataset filenames);
 #include <NearestNeighbor.h>
 #include <svm.h>
 #include <bow.h>
-#include <eigen.h>
+#include <eigen_food.h>
 // Figure out a list of files in a given directory.
 //
 vector<string> files_in_directory(const string &directory, bool prepend_directory = false)
@@ -96,12 +96,13 @@ int main(int argc, char **argv)
     
     else if (algo=="eigen")
     {
+      /*
       vector<string> list_of_images=files_in_directory(mode,true);
       for(int i=0;i<list_of_images.size();i++)
       {
         vector<string> names_of_images=files_in_directory(list_of_images[i],true);
         eigen_build_db(names_of_images);
-        /* Load mean food from disk and initialize variables */
+        // Load mean food from disk and initialize variables 
         CImg<float> mean( "eigen.mean.bmp" ), food;
         vector< CImg<float> > foods;
         eigen_db_t db;
@@ -135,17 +136,17 @@ int main(int argc, char **argv)
         }
         
         
-        /* Load learned system from disk and allocate memory for new structures. */
+        // Load learned system from disk and allocate memory for new structures.
         eigen_load_db(&db);
         eigen_load_info(&trainingset_info, db);
         projections = eigen_load_vectors(db);
         float * weights = new float[db.food * db.food];
         eigen_load_weights(db, weights);
         float * iweights = new float[db.food * foods.size()];
-        /* Project test images to learned eigen food space to obtain feature vectors. */
+        // Project test images to learned eigen food space to obtain feature vectors.
         eigen_build_iweights(foods, mean, projections, db.food, iweights);
-      }
-      
+      }*/
+      classifier = new EIGEN_FOOD(class_list);
     }
     else if (algo=="haar")
     {

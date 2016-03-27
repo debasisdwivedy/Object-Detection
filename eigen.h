@@ -29,12 +29,16 @@ void process_image( CImg<float>& image,
                     CImg<float>& mean,
                     int trainingset_size ){
   int i, j;
-  //image.resize(512,512,1,1);
+  //CImg<float> gray = image.get_RGBtoHSI().get_channel(2);
+  //cout<<"Before resize"<<endl;
+  image.resize(40,40,1,1);
+  //cout<<"After resize"<<endl;
   for( i = 0; i < image.width(); i++ ){
     for( j = 0; j < image.height(); j++ ){
       *mean.data( i, j ) += *image.data( i, j ) / (trainingset_size);
     }
   }
+  cout<<"end of process image"<<endl;
 }
 
 void normalize_image( CImg<float>& image,
@@ -47,6 +51,7 @@ void normalize_image( CImg<float>& image,
       normalized_m[index][k] = *image.data( i, j ) - *mean.data( i, j );
     }
   }
+  cout<<"end of normalize_image"<<endl;
 }
 
 void eigen_covariance( float **& normalized_m,
@@ -65,7 +70,7 @@ void eigen_covariance( float **& normalized_m,
     }
   }
   for( m = 0; m < trainingset_size; m++ ){
-    if( m % 64 == 0 ){
+    if( m % 30 == 0 ){
       printf( "step 4/6 (covariance): image %d of %d\n", m, trainingset_size );
       fflush(stdout);
     }
@@ -206,10 +211,11 @@ float ** eigen_project( float **& m_normalized,
                         float **& eigenvectors,
                         float *& eigenvalues,
                         int vector_size,
-                        int trainingset_size ){
+                        int trainingset_size ,string mode){
   float value = 0, mag,
     **projections,
     **transpose;
+    
     projections = new float * [trainingset_size];
     for( int i = 0; i < trainingset_size; i++ ){
       projections[i] = new float[vector_size];
@@ -223,9 +229,17 @@ float ** eigen_project( float **& m_normalized,
         transpose[i][j] = m_normalized[j][i];
       }
     }
-    FILE *fp = fopen( "eigen.vectors.dat", "w+b" );
+    /*if(mode.compare("train") == 0)
+    {
+    *fp = fopen( "eigen.vectors.train.dat", "w+b" );
+    }
+    else
+    {
+      *fp = fopen( "eigen.vectors.test.dat", "w+b" );
+    }*/
+    FILE *fp=fopen( "eigen.vectors.dat", "w+b" );
     for( int k = 0; k < trainingset_size; k++ ){
-      if( k % 64 == 0 ){
+      if( k % 30 == 0 ){
         printf( "step 5/6 (projection): image %d of %d\n", k, trainingset_size );
         fflush(stdout);
       }
@@ -274,12 +288,43 @@ float *eigen_weights( CImg<float>& face,
   return weights;
 }
 
+void eigen_build_db_test(const string &image_file){
+  CImg<float> input_image(image_file.c_str());
+  CImg<float> mean( 40, 40, 1, 1 );
+  cout<<image_file.c_str()<<endl;
+  float **normalized_m,**covariance_m,**eigenvectors,*eigenvalues,**eigenprojections;
+  string path = image_file;
+  std::size_t found = path.find_last_of("/\\");
+  std::string str=path.substr(found+1,path.length()-1);
+  image_info img;
+  img.subject = atoi(str.c_str());
+  fflush(stdout);
+  process_image(input_image, mean, 1 );
+  normalized_m = new float * [1];
+  normalized_m[0] = new float[ mean.width() * mean.height()];
+  normalize_image(input_image, 0, mean, normalized_m );
+  fflush(stdout);
+  covariance_m = new float * [ 1 ];
+  covariance_m[0] = new float[ 1];
+  eigen_covariance( normalized_m, covariance_m, mean.width() * mean.height(),
+                    1 );
+  eigenvalues = new float [1];
+  eigenvectors = new float * [1];
+  eigenvectors[0] = new float [1];
+  int ret = eigen_decomposition( covariance_m, 1, eigenvalues,
+                                 eigenvectors );
+  eigenprojections = eigen_project( normalized_m, eigenvectors, eigenvalues,
+                                    mean.width() * mean.height(),
+                                    1 ,"test");
+  fflush(stdout);
+}
+
 void eigen_build_db( vector<string> path_of_images ){
   eigen_db_t db;
   vector< CImg<float> * > trainingset;
   vector< image_info > trainingset_info;
-  /* expects 256 x 256 image. TODO: generalize */
-  CImg<float> mean( 512, 512, 1, 1 ); // mean face from training set
+  /* expects 40 x 40 image. TODO: generalize */
+  CImg<float> mean( 40, 40, 1, 1 ); // mean face from training set
   float **normalized_m, // normalized food matrix A
   **covariance_m, // covariance matrix (C = tA*A --> C = A*tA)
   **eigenvectors, // eigenvectors of jacobi decomposition
@@ -368,7 +413,7 @@ void eigen_build_db( vector<string> path_of_images ){
   printf( "\t@ Projecting eigenvectors ...\n" );
   eigenprojections = eigen_project( normalized_m, eigenvectors, eigenvalues,
                                     mean.width() * mean.height(),
-                                    trainingset.size() );
+                                    trainingset.size() ,"train");
   printf( "\t@ Saving eigen values ...\n" );
   fflush(stdout);
   FILE *fp = fopen( "eigen.values.dat", "w+b" );
@@ -380,7 +425,7 @@ void eigen_build_db( vector<string> path_of_images ){
   fflush(stdout);
   eigenweights = new float * [trainingset.size()];
   for( i = 0; i < trainingset.size(); i++ ){
-    if( i % 64 == 0 ){
+    if( i % 30 == 0 ){
       printf( "step 6/6 (eigen weights): image %d of %d; subject %d",
               i, trainingset.size(), trainingset_info[i].subject);
       fflush(stdout);
