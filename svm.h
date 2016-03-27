@@ -92,7 +92,7 @@ public:
         //   system("cd svm_multiclass");
         system("make > garbage.txt");
         //  system("ls -l >pwd.txt ");
-
+       cout<<svm_model_name<<endl;
         string svm_command="./svm_multiclass__classify ../test.dat ../"+svm_model_name+" ../test_output.txt >../test.txt ";
 
       //  system("./svm_multiclass_classify ../test.dat ../svm_model ../test_output.txt >../test.txt ");
