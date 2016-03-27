@@ -200,7 +200,7 @@ protected:
     vector<double> deep_features(CImg<double> image)
     {
         vector<double>  feature_vector;
-        int len=2;
+        int len=270;
         image.resize(len,len,1,3);
         image.save("resized.jpg");
        // cout<< filename<<endl;
@@ -275,9 +275,11 @@ protected:
         int pos_y=rand()%(image.height()-size_y-1)+size_y;
 
 
-        //  cout <<pos_x<<" "<< pos_y<< " "<< size_x<<" "<<size_y<< " "<< image.height()<< " "<< image.width() <<endl;
+          cout <<pos_x<<" "<< pos_y<< " "<< size_x<<" "<<size_y<< " "<< image.height()<< " "<< image.width() <<endl;
 
         //D+A-B-C
+
+
         double filtered_total_sum=integral_image(pos_x,pos_y,0,0)+integral_image(pos_x-size_x,pos_y-size_y,0,0)
                                   -integral_image(pos_x-size_x,pos_y,0,0)-integral_image(pos_x,pos_y-size_y,0,0);
 
@@ -291,7 +293,10 @@ protected:
         {
             feature_value=m*filtered_total_sum/2;
         }
+        svm_model_name="deep_svm_model";
+        return feature_value;
     }
+
     vector<double> haar_features(CImg<double> image)
     {
         // CIMG initialize
@@ -444,7 +449,7 @@ protected:
 
 
         }
-        svm_model_name="deep_svm_model";
+        //svm_model_name="baseline_svm_model";
 
         return feature_vector;
       //  return (CImg<double>(filename.c_str())).resize(size,size,1,3).unroll('x');
