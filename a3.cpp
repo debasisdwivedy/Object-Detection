@@ -31,6 +31,7 @@
 #include <map>
 #include<unistd.h>
 #include <numeric>
+#include <sstream>
 
 //Use the cimg namespace to access the functions easily
 using namespace cimg_library;
@@ -102,15 +103,16 @@ int main(int argc, char **argv)
     }
     else if(algo=="deep")
     {
-	cout<<"Downloading data"<<endl;
-	chdir("overfeat/");
-        system("python download_weights.py >garbage.txt");
-        chdir("../");
+	//cout<<"Downloading data"<<endl;
+	//chdir("overfeat/");
+      //  system("python download_weights.py >garbage.txt");
+       // chdir("../");
  	classifier=new SVM(class_list,4);
     }
     else if(algo=="test")
     {
-      CImg<double > test("test.jpg");
+
+      CImg<double > test("train/bagel/106970.jpg");
       CImg<double > s(4,4,1,1);
       CImg<double > ii(4,4,1,1);
       vector<double> oned;

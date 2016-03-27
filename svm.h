@@ -54,7 +54,7 @@ public:
         chdir("svm_multiclass/");
         system("make > garbage.txt ");
 
-        system("./svm_multiclass_learn -c 50 t 2 ../train.dat ../svm_model >../train.txt");
+        system("./svm_multiclass_learn -c 50 ../train.dat ../svm_model >../train.txt");
     }
 
     virtual string classify(const string &filename)
@@ -85,7 +85,7 @@ public:
         while (std::getline(outputfile, str))
         {
             int index=str.find(" ");
-	     string s=str.substr(0,index);
+	        string s=str.substr(0,index);
             int c_index=atoi(s.c_str());
             //int c_index=stoi(str.substr(0,index));
            // cout<<class_list[c_index-1]<<endl;
@@ -156,10 +156,45 @@ protected:
     vector<double> deep_features(const string &filename)
     {
         vector<double>  feature_vector;
-        cout<< filename<<endl;
-        string command="./overfeat/bin/linux_64/overfeat -f "+filename+" > deep_features.txt";
-        cout<<command<<endl;
-	system(command.c_str());
+       // cout<< filename<<endl;
+       // string command="./overfeat/bin/linux_64/overfeat -f "+filename+" > deep_features.txt";
+       // cout<<command<<endl;
+	    //system(command.c_str());
+        ifstream featurefile("deep_features.txt");
+        string str;
+        getline(featurefile, str);
+
+        //cout<<str<<endl;
+
+        int index=str.find(" ");
+        string s=str.substr(0,index);
+        string rest=str.substr(index+1);
+        int h_index=rest.find(" ");
+        int n=atoi(s.c_str());
+
+        s=rest.substr(0,h_index);
+        int h=atoi(s.c_str());
+        s=rest.substr(h_index+1);
+        int r=atoi(s.c_str());
+
+        getline(featurefile,str);
+        std::stringstream ss(str);
+
+        double value;
+        while (ss >> value)
+        {
+           feature_vector.push_back(value);
+
+            if (ss.peek() == ' ')
+                ss.ignore();
+        }
+
+
+
+       // getline(featurefile,str);
+     //   cout<<n <<" h: "<<h <<" w: "<<r<<endl;
+
+
         
        return feature_vector; 
         
