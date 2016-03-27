@@ -153,11 +153,14 @@ public:
 protected:
     // extract features from an image, which in this case just involves resampling and
     // rearranging into a vector of pixel data.
-    vector<double> deep_features(const string &filename)
+    vector<double> deep_features(CImg<double> image)
     {
         vector<double>  feature_vector;
+        int len=250;
+        image.resize(len,len,1,3);
+        image.save("resized.jpg");
        // cout<< filename<<endl;
-        string command="./overfeat/bin/linux_64/overfeat -f "+filename+" > deep_features.txt";
+        string command="./overfeat/bin/linux_64/overfeat -f resized.jpg > deep_features.txt";
        // cout<<command<<endl;
 	    system(command.c_str());
         ifstream featurefile("deep_features.txt");
@@ -187,17 +190,16 @@ protected:
         {
            feature_vector.push_back(value);
 
+
             if (ss.peek() == ' ')
                 ss.ignore();
         }
 
-
+        //cout<<feature_vector.size()<<endl;
 
        // getline(featurefile,str);
      //   cout<<n <<" h: "<<h <<" w: "<<r<<endl;
-
-
-        
+        featurefile.close();
        return feature_vector; 
         
     }
@@ -301,7 +303,7 @@ protected:
         }
 	else if (feature_type==4)
         {
-            feature_vector=deep_features(filename);
+            feature_vector=deep_features(image);
         }
         else
         {
