@@ -207,8 +207,6 @@ protected:
 
     vector<double> haar_features(CImg<double> image)
     {
-        //cout<< "Haar Features"<<endl;
-
         // CIMG initialize
         CImg<double> gray_image(image.width(),image.height(),1,1);
         CImg<double> integral_image(image.width(),image.height(),1,1);
@@ -232,7 +230,9 @@ protected:
             gray_image= image.get_RGBtoHSI().get_channel(2);
             image=gray_image;
         }
-        image.normalize(0,255).save("test.jpg");
+        //image.normalize(0,255).save("test.jpg");
+        int haar_size=40;
+        image.resize(haar_size,haar_size,1,3);
 
         for(int x=0;x<image.width();x++)
         {
