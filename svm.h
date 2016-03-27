@@ -156,7 +156,7 @@ protected:
     vector<double> deep_features(CImg<double> image)
     {
         vector<double>  feature_vector;
-        int len=250;
+        int len=275;
         image.resize(len,len,1,3);
         image.save("resized.jpg");
        // cout<< filename<<endl;
@@ -231,7 +231,7 @@ protected:
             image=gray_image;
         }
         //image.normalize(0,255).save("test.jpg");
-        int haar_size=40;
+        int haar_size=80;
         image.resize(haar_size,haar_size,1,3);
 
         for(int x=0;x<image.width();x++)
@@ -260,6 +260,8 @@ protected:
             size_y=size_y*r_size_y;
             int black=rand()%2; // 0 black, 1 white
 
+            int m=black==0?-1:1;
+
             int pos_x=rand()%(image.width()-size_x-1)+size_x;
             int pos_y=rand()%(image.height()-size_y-1)+size_y;
 
@@ -275,11 +277,11 @@ protected:
             double feature_value=0;
             if (which_feature==2||which_feature==3)
             {
-                feature_value=2*(filtered_total_sum)/3;
+                feature_value=2*m*(filtered_total_sum)/3;
             }
             else
             {
-                feature_value=filtered_total_sum/2;
+                feature_value=m*filtered_total_sum/2;
             }
             feature_vector.push_back(feature_value);
         }
