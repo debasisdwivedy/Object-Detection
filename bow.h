@@ -7,7 +7,8 @@
 
 #endif //CTAY_DDWIVEDY_TOUAHMED_A3_BOW_H
 
-#define num_clusters 100
+#define num_clusters 500
+static const int imgsize = 128;
 
 class Histograms
 {
@@ -34,6 +35,7 @@ public:
 
     virtual void train(const Dataset &filenames)
     {
+
         // Set up file containing all the SIFT descriptors for all the training images.
         ofstream datafile;
         datafile.open("bow_train.dat");
@@ -50,6 +52,8 @@ public:
                 // Load each image, convert to grayscale and compute SIFT descriptors
                 CImg<double> input_image(c_iter->second[i].c_str());
                 CImg<double> gray = input_image.get_RGBtoHSI().get_channel(2);
+                // resize image.
+                gray.resize(imgsize,imgsize,1,1);
                 vector <SiftDescriptor> descriptors = Sift::compute_sift(gray);
 
                 // Record values of each SIFT descriptor
@@ -73,12 +77,13 @@ public:
         }
         datafile.close();
 
+
         // Run Yakmo to cluster descriptors. 100 is number of clusters. Change this value if changing k (number of clusters).
         // bow_train.dat is the data file containing all the SIFT descriptors. Each line is 1 descriptor.
         // Each line in the file starts with the class value followed by each value in the 128d SIFT vector.
         // kmeans_centroid.txt is the file that yakmo saves the cluster centroid values to.
         // kmeans_output.txt is the output file - each line represents the image and the cluster that each SIFT descriptor corresponds to.
-        system("yakmo -k 100 bow_train.dat kmeans_centroid.txt - -O 2 >kmeans_output.txt");
+        system("yakmo -k 500 bow_train.dat kmeans_centroid.txt - -O 2 >kmeans_output.txt");
 
         // Read in kmeans_output.txt and create a histogram for each image
         ifstream outputfile("kmeans_output.txt");
@@ -97,12 +102,13 @@ public:
             else
             {
                 int index=str.find(" ");
-                //int c_index=stoi(str.substr(0,index));
                 string name=str.substr(0,index);
-                int value=stoi(str.substr(index+1));
+                string s=str.substr(index+1);
+                int value=atoi(s.c_str());
 
                 index=name.find("_");
-                int category=stoi(name.substr(0,index));
+                string p=name.substr(0,index);
+                int category=atoi(p.c_str());
 
                 string file_path=name.substr(index+1);
 
@@ -122,7 +128,7 @@ public:
         {
 
             bowhist<<(*it)->category<<" ";
-            for(int j=0;j<100;j++)
+            for(int j=0;j<500;j++)
             {
                 //cout<<j+1<<": "<<(*it)->arr[j]<<" ";
                 bowhist<<j+1<<":"<<(*it)->arr[j]<<" ";
@@ -190,12 +196,13 @@ public:
             else
             {
                 int index=str.find(" ");
-                //int c_index=stoi(str.substr(0,index));
                 string name=str.substr(0,index);
-                int value=stoi(str.substr(index+1));
+                string r=str.substr(index+1);
+                int value=atoi(r.c_str());
 
                 index=name.find("_");
-                int category=stoi(name.substr(0,index));
+                string t=name.substr(0,index);
+                int category=atoi(t.c_str());
 
                 string file_path=name.substr(index+1);
 
@@ -214,7 +221,7 @@ public:
 
 
         bowhist<<hist->category<<" ";
-        for(int j=0;j<100;j++)
+        for(int j=0;j<500;j++)
         {
             //cout<<j+1<<": "<<(*it)->arr[j]<<" ";
             bowhist<<j+1<<":"<<hist->arr[j]<<" ";
@@ -236,7 +243,8 @@ public:
         while (std::getline(testoutputfile, str1))
         {
             int index=str1.find(" ");
-            int c_index=stoi(str1.substr(0,index));
+            string y=str1.substr(0,index);
+            int c_index=atoi(y.c_str());
             output_label=class_list[c_index-1];
             cout<<output_label<<endl;
         }
