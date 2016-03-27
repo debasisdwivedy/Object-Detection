@@ -121,53 +121,6 @@ public:
         return;
 
     }
- /*   virtual void test(const Dataset &filenames)
-    {
-        cout<<"In SVM test "<<endl;
-        ofstream datafile;
-        datafile.open("test.dat");
-
-        for(Dataset::const_iterator c_iter=filenames.begin(); c_iter != filenames.end(); ++c_iter)
-        {
-            cout << "SVM: Processing " << c_iter->first << endl;
-            int target=distance(filenames.begin(), c_iter)+1;
-
-            for(int i=0; i<c_iter->second.size(); i++)
-            {
-                vector<double> features=extract_features(c_iter->second[i].c_str());
-                datafile<<target<<" ";
-                for(int j=0;j<features.size();j++)
-                {
-                    datafile<<(j+1)<<":"<<features.at(j)<<" ";
-                }
-                datafile<<"\n";
-            }
-
-        }
-        datafile.close();
-        datafile.close();
-        chdir("svm_multiclass/");
-     //   system("cd svm_multiclass");
-        system("make");
-      //  system("ls -l >pwd.txt ");
-        system("./svm_multiclass_classify ../test.dat ../svm_model ../output_file.txt >../test.txt ");
-
-        chdir("../");
-        cout << ifstream("test.txt").rdbuf();
-
-        string str;
-        ifstream outputfile("output_file.txt");
-        while (std::getline(outputfile, str))
-        {
-            int index=str.find(" ");
-            int c_index=stoi(str.substr(0,index));
-            cout<<class_list[c_index-1]<<endl;
-        }
-
-
-    }*/
-
-
 
 protected:
     // extract features from an image, which in this case just involves resampling and
@@ -239,12 +192,13 @@ protected:
                 ss.ignore();
         }
 
-        cout<<feature_vector.size()<<endl;
+       // cout<<feature_vector.size()<<endl;
 
        // getline(featurefile,str);
      //   cout<<n <<" h: "<<h <<" w: "<<r<<endl;
         featurefile.close();
 
+        svm_model_name="deep_svm_model";
        return feature_vector; 
         
     }
@@ -275,12 +229,15 @@ protected:
         int pos_y=rand()%(image.height()-size_y-1)+size_y;
 
 
-          cout <<pos_x<<" "<< pos_y<< " "<< size_x<<" "<<size_y<< " "<< image.height()<< " "<< image.width() <<endl;
+       //   cout <<pos_x<<" "<< pos_y<< " "<< size_x<<" "<<size_y<< " "<< image.height()<< " "<< image.width() <<endl;
 
         //D+A-B-C
 
-
-        double filtered_total_sum=integral_image(pos_x,pos_y,0,0)+integral_image(pos_x-size_x,pos_y-size_y,0,0)
+        int changed_x=pos_x-size_x;
+        int changed_y=pos_y-size_y;
+        double filtered_total_sum=0;
+        if(pos_x>0 && pos_y>0 && changed_x>0 && changed_y>0)
+            filtered_total_sum=integral_image(pos_x,pos_y,0,0)+integral_image(pos_x-size_x,pos_y-size_y,0,0)
                                   -integral_image(pos_x-size_x,pos_y,0,0)-integral_image(pos_x,pos_y-size_y,0,0);
 
 
@@ -293,7 +250,7 @@ protected:
         {
             feature_value=m*filtered_total_sum/2;
         }
-        svm_model_name="deep_svm_model";
+
         return feature_value;
     }
 
@@ -326,8 +283,8 @@ protected:
             image=gray_image;
         }
         //image.normalize(0,255).save("test.jpg");
-        int haar_size=128;
-        image.resize(haar_size,haar_size,1,3);
+        int haar_size=80;
+        image.resize(haar_size,haar_size,1,grayscale);
 
 
       //  double integral_image[grayscale][image.width()][image.height()];
