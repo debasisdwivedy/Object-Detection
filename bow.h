@@ -8,7 +8,6 @@
 #endif //CTAY_DDWIVEDY_TOUAHMED_A3_BOW_H
 
 #define num_clusters 500
-static const int imgsize = 128;
 
 class Histograms
 {
@@ -52,8 +51,7 @@ public:
                 // Load each image, convert to grayscale and compute SIFT descriptors
                 CImg<double> input_image(c_iter->second[i].c_str());
                 CImg<double> gray = input_image.get_RGBtoHSI().get_channel(2);
-                // resize image.
-                gray.resize(imgsize,imgsize,1,1);
+                //gray.resize(imgsize,imgsize,1,1);
                 vector <SiftDescriptor> descriptors = Sift::compute_sift(gray);
 
                 // Record values of each SIFT descriptor
@@ -83,7 +81,7 @@ public:
         // Each line in the file starts with the class value followed by each value in the 128d SIFT vector.
         // kmeans_centroid.txt is the file that yakmo saves the cluster centroid values to.
         // kmeans_output.txt is the output file - each line represents the image and the cluster that each SIFT descriptor corresponds to.
-        system("yakmo -k 500 bow_train.dat kmeans_centroid.txt - -O 2 >kmeans_output.txt");
+        system("./yakmo -k 500 bow_train.dat kmeans_centroid.txt - -O 2 >kmeans_output.txt");
 
         // Read in kmeans_output.txt and create a histogram for each image
         ifstream outputfile("kmeans_output.txt");
@@ -158,6 +156,7 @@ public:
             // Load each test image, convert to grayscale and compute SIFT descriptors.
             CImg<double> input_image(filename.c_str());
             CImg<double> gray = input_image.get_RGBtoHSI().get_channel(2);
+            gray.resize(imgsize,imgsize,1,1);
             vector <SiftDescriptor> descriptors = Sift::compute_sift(gray);
 
             for (int j = 0; j < descriptors.size(); j++)
@@ -177,7 +176,7 @@ public:
         // Run Yakmo to cluster SIFT descriptors from the test images using the centroids obtained from training data.
         // kmeans_centroid.txt is the input file (generated from training step) containing SIFT values of each cluster centroid.
         // bow_test.txt is the output file - each line represents the image and the cluster that each SIFT descriptor corresponds to.
-        system("yakmo - kmeans_centroid.txt bow_test.dat -O 2 >bow_test.txt");
+        system("./yakmo - kmeans_centroid.txt bow_test.dat -O 2 >bow_test.txt");
 
         // Read in bow_test.txt file and create histogram for each image.
         ifstream outputfile("bow_test.txt");
