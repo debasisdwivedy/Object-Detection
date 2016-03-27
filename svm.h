@@ -157,14 +157,16 @@ protected:
     {
         vector<double>  feature_vector;
        // cout<< filename<<endl;
-       // string command="./overfeat/bin/linux_64/overfeat -f "+filename+" > deep_features.txt";
+        string command="./overfeat/bin/linux_64/overfeat -f "+filename+" > deep_features.txt";
        // cout<<command<<endl;
-	    //system(command.c_str());
+	    system(command.c_str());
         ifstream featurefile("deep_features.txt");
         string str;
         getline(featurefile, str);
 
         //cout<<str<<endl;
+
+
 
         int index=str.find(" ");
         string s=str.substr(0,index);
