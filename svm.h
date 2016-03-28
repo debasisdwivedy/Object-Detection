@@ -81,6 +81,7 @@ public:
         datafile.open("test.dat");
         vector<double> features = extract_features(filename);
         datafile<<"1 ";
+       // cout<<features.size()<<endl;
         for(int j=0;j<features.size();j++)
         {
             datafile<<(j+1)<<":"<<features.at(j)<<" ";
@@ -92,8 +93,10 @@ public:
         //   system("cd svm_multiclass");
         system("make > garbage.txt");
         //  system("ls -l >pwd.txt ");
-       cout<<svm_model_name<<endl;
-        string svm_command="./svm_multiclass__classify ../test.dat ../"+svm_model_name+" ../test_output.txt >../test.txt ";
+     //  cout<<svm_model_name<<endl;
+        string svm_command="./svm_multiclass_classify ../test.dat ../"+svm_model_name+" ../test_output.txt >../test.txt ";
+        //cout<<svm_command<<endl;
+        system(svm_command.c_str());
 
       //  system("./svm_multiclass_classify ../test.dat ../svm_model ../test_output.txt >../test.txt ");
         chdir ("../");
@@ -106,6 +109,7 @@ public:
             int index=str.find(" ");
 	        string s=str.substr(0,index);
             int c_index=atoi(s.c_str());
+            //cout<<c_index<<endl;
             //int c_index=stoi(str.substr(0,index));
            // cout<<class_list[c_index-1]<<endl;
             output_label=class_list[c_index-1];
@@ -236,9 +240,13 @@ protected:
         int changed_x=pos_x-size_x;
         int changed_y=pos_y-size_y;
         double filtered_total_sum=0;
-        if(pos_x>0 && pos_y>0 && changed_x>0 && changed_y>0)
+        if(pos_x>0 && pos_y>0 && changed_x>0 && changed_y>0&& pos_x<integral_image.width()
+           && pos_y<integral_image.height() && changed_x<integral_image.width() && changed_y<integral_image.height())
+        {
+
             filtered_total_sum=integral_image(pos_x,pos_y,0,0)+integral_image(pos_x-size_x,pos_y-size_y,0,0)
-                                  -integral_image(pos_x-size_x,pos_y,0,0)-integral_image(pos_x,pos_y-size_y,0,0);
+                               -integral_image(pos_x-size_x,pos_y,0,0)-integral_image(pos_x,pos_y-size_y,0,0);
+        }
 
 
         double feature_value=0;
@@ -269,7 +277,7 @@ protected:
        // Followed http://stackoverflow.com/questions/1707620/viola-jones-face-detection-claims-180k-features
         int features=5;
         int feature[5][2] = {{2,1}, {1,2}, {3,1}, {1,3}, {2,2}};
-        int max_size=24;
+        int max_size=40;
         int no_of_features=1000;
 
         srand (time(NULL));
@@ -283,7 +291,7 @@ protected:
             image=gray_image;
         }
         //image.normalize(0,255).save("test.jpg");
-        int haar_size=80;
+        int haar_size=160;
         image.resize(haar_size,haar_size,1,grayscale);
 
 
@@ -301,6 +309,7 @@ protected:
                   //  integral_image[c][x][y]=x>0?row_sum(x,y,0,0)+integral_image[c][x-1][y]:row_sum(x,y,0,0);
                 }
             }
+
             Integral_Image ii(integral_image);
             integral_images.push_back(ii);
 
@@ -316,9 +325,11 @@ protected:
             {
                 integral_image=integral_images.at(c).ii;
                 int feature_value=get_haar_feature(image,integral_image);
+               // cout<<feature_value<<" ";
                 feature_vector.push_back(feature_value);
 
             }
+
 
      /*       int which_feature = rand() % 5;
             int size_x = feature[which_feature][0];
@@ -359,7 +370,9 @@ protected:
            // feature_vector.push_back(feature_value);
         }
 
+
      //   cout<<"Haar Done"<<endl;
+   //     cout<<feature_vector.size()<<endl;
         svm_model_name="haar_svm_model";
         return feature_vector;
     }
