@@ -42,26 +42,31 @@ public:
 
 
             // convert each image to be a row of this "model" image
+
             int target=distance(filenames.begin(), c_iter)+1;
+          //  cout<<target<<endl;
+           // cout<<"target"<<endl;
 
             for(int i=0; i<c_iter->second.size(); i++)
             {
                 vector<double> features=extract_features(c_iter->second[i].c_str());
                 datafile<<target<<" ";
+             //   cout<<"Train "<<features.size()<<endl;
 
                 for(int j=0;j<features.size();j++)
                 {
                     datafile<<(j+1)<<":"<<features.at(j)<<" ";
+                  //  cout<<features.at(j)<<" ";
                 }
                 datafile<<"\n";
+              //  cout<<endl;
+
+
 
             }
 
         }
         datafile.close();
-
-
-
 
       //  system("cd svm_multiclass/");
         chdir("svm_multiclass/");
@@ -69,7 +74,6 @@ public:
 
 
         string svm_command="./svm_multiclass_learn -c 50 ../train.dat ../"+svm_model_name+" >../train.txt";
-      //  system("./svm_multiclass_learn -c 50 ../train.dat ../svm_model >../train.txt");
         system(svm_command.c_str());
     }
 
@@ -90,10 +94,9 @@ public:
         datafile.close();
 
         chdir("svm_multiclass/");
-        //   system("cd svm_multiclass");
+
         system("make > garbage.txt");
-        //  system("ls -l >pwd.txt ");
-     //  cout<<svm_model_name<<endl;
+
         string svm_command="./svm_multiclass_classify ../test.dat ../"+svm_model_name+" ../test_output.txt >../test.txt ";
         //cout<<svm_command<<endl;
         system(svm_command.c_str());
@@ -109,9 +112,6 @@ public:
             int index=str.find(" ");
 	        string s=str.substr(0,index);
             int c_index=atoi(s.c_str());
-            //cout<<c_index<<endl;
-            //int c_index=stoi(str.substr(0,index));
-           // cout<<class_list[c_index-1]<<endl;
             output_label=class_list[c_index-1];
             //cout<<str<<endl;
         }
@@ -168,9 +168,6 @@ protected:
         string str;
         getline(featurefile, str);
 
-        //cout<<str<<endl;
-
-
 
         int index=str.find(" ");
         string s=str.substr(0,index);
@@ -196,10 +193,6 @@ protected:
                 ss.ignore();
         }
 
-       // cout<<feature_vector.size()<<endl;
-
-       // getline(featurefile,str);
-     //   cout<<n <<" h: "<<h <<" w: "<<r<<endl;
         featurefile.close();
 
         svm_model_name="deep_svm_model";
@@ -209,12 +202,15 @@ protected:
 
     double get_haar_feature(CImg<double> image,CImg<double> integral_image)
     {
+      //  cout<<"Get Haar Started"<<endl;
         int features=5;
         int feature[5][2] = {{2,1}, {1,2}, {3,1}, {1,3}, {2,2}};
         int max_size=24;
-        int no_of_features=1000;
+        int no_of_features=50;
+        srand (time(NULL));
 
         int which_feature = rand() % 5;
+
         int size_x = feature[which_feature][0];
         int size_y = feature[which_feature][1];
 
@@ -240,6 +236,7 @@ protected:
         int changed_x=pos_x-size_x;
         int changed_y=pos_y-size_y;
         double filtered_total_sum=0;
+     //   cout<<"Possible Seg Started"<<endl;
         if(pos_x>0 && pos_y>0 && changed_x>0 && changed_y>0&& pos_x<integral_image.width()
            && pos_y<integral_image.height() && changed_x<integral_image.width() && changed_y<integral_image.height())
         {
@@ -247,6 +244,8 @@ protected:
             filtered_total_sum=integral_image(pos_x,pos_y,0,0)+integral_image(pos_x-size_x,pos_y-size_y,0,0)
                                -integral_image(pos_x-size_x,pos_y,0,0)-integral_image(pos_x,pos_y-size_y,0,0);
         }
+
+      //  cout<<"Possible Seg Finished"<<endl;
 
 
         double feature_value=0;
@@ -258,9 +257,11 @@ protected:
         {
             feature_value=m*filtered_total_sum/2;
         }
-
+      //  cout<<"Get Haar Done"<<endl;
         return feature_value;
     }
+
+
 
     vector<double> haar_features(CImg<double> image)
     {
@@ -277,21 +278,21 @@ protected:
        // Followed http://stackoverflow.com/questions/1707620/viola-jones-face-detection-claims-180k-features
         int features=5;
         int feature[5][2] = {{2,1}, {1,2}, {3,1}, {1,3}, {2,2}};
-        int max_size=40;
-        int no_of_features=1000;
+        int max_size=20;
+        int no_of_features=100;
 
         srand (time(NULL));
 
 
         vector<double>  feature_vector;
-        int grayscale=1;  // Test with Grayscale and Color
+        int grayscale=3;  // Test with Grayscale and Color
         if(image.spectrum() == 3 && grayscale==1)
         {
             gray_image= averageGrayscale(image);//image.get_RGBtoHSI().get_channel(2);
             image=gray_image;
         }
         //image.normalize(0,255).save("test.jpg");
-        int haar_size=160;
+        int haar_size=40;
         image.resize(haar_size,haar_size,1,grayscale);
 
 
@@ -304,7 +305,7 @@ protected:
                 for(int y=0;y<image.height();y++)
                 {
 
-                    row_sum(x,y,0,0)=y>0?row_sum(x,y-1,0,0)+image(x,y,0,0):image(x,y,0,0);
+                    row_sum(x,y,0,0)=y>0?row_sum(x,y-1,0,0)+image(x,y,0,c):image(x,y,0,c);
                      integral_image(x,y,0,0)=x>0?row_sum(x,y,0,0)+integral_image(x-1,y,0,0):row_sum(x,y,0,0);
                   //  integral_image[c][x][y]=x>0?row_sum(x,y,0,0)+integral_image[c][x-1][y]:row_sum(x,y,0,0);
                 }
@@ -319,62 +320,41 @@ protected:
 
        // integral_images.push_back(integral_image);
         // Feature Generation
+
+        double min=1000000000000000;
+        double max=-10000000;
        for(int i=0;i<no_of_features;i++)
         {
             for(int c=0;c<grayscale;c++)
             {
+             //   cout<<"Is c?1 "<<c<<endl;
+
                 integral_image=integral_images.at(c).ii;
                 int feature_value=get_haar_feature(image,integral_image);
                // cout<<feature_value<<" ";
+                if(feature_value<min)
+                    min=feature_value;
+                if(feature_value>max)
+                    max=feature_value;
                 feature_vector.push_back(feature_value);
 
             }
+        }
 
+        vector<double> normalized;
 
-     /*       int which_feature = rand() % 5;
-            int size_x = feature[which_feature][0];
-            int size_y = feature[which_feature][1];
-
-            int max=size_x>size_y?size_x:size_y;
-
-            int r_size_x=rand()%(max_size/size_x)+1;
-            int r_size_y=rand()%(max_size/size_y)+1;
-
-            size_x=size_x*r_size_x;
-            size_y=size_y*r_size_y;
-            int black=rand()%2; // 0 black, 1 white
-
-            int m=black==0?-1:1;
-
-            int pos_x=rand()%(image.width()-size_x-1)+size_x;
-            int pos_y=rand()%(image.height()-size_y-1)+size_y;
-
-
-          //  cout <<pos_x<<" "<< pos_y<< " "<< size_x<<" "<<size_y<< " "<< image.height()<< " "<< image.width() <<endl;
-
-            //D+A-B-C
-            double filtered_total_sum=integral_image(pos_x,pos_y,0,0)+integral_image(pos_x-size_x,pos_y-size_y,0,0)
-                                -integral_image(pos_x-size_x,pos_y,0,0)-integral_image(pos_x,pos_y-size_y,0,0);
-
-
-
-            double feature_value=0;
-            if (which_feature==2||which_feature==3)
-            {
-                feature_value=2*m*(filtered_total_sum)/3;
-            }
-            else
-            {
-                feature_value=m*filtered_total_sum/2;
-            }*/
-           // feature_vector.push_back(feature_value);
+        for(int i=0;i<no_of_features;i++)
+        {
+            double v=-1+(2*(feature_vector.at(i)-min)/(max-min));
+          //  cout<<v<<" ";
+            normalized.push_back(v);
         }
 
 
-     //   cout<<"Haar Done"<<endl;
-   //     cout<<feature_vector.size()<<endl;
-        svm_model_name="haar_svm_model";
-        return feature_vector;
+ //       double max=feature_vector.at(no_of_features-1)<<endl;
+
+        return normalized;
+        //return feature_vector;
     }
 
     vector<double> extract_features(const string &filename)
@@ -389,7 +369,7 @@ protected:
         {
             feature_vector=haar_features(image);
         }
-	else if (feature_type==4)
+	    else if (feature_type==4)
         {
             feature_vector=deep_features(image);
         }
@@ -419,7 +399,6 @@ protected:
 
 
         }
-        //svm_model_name="baseline_svm_model";
 
         return feature_vector;
       //  return (CImg<double>(filename.c_str())).resize(size,size,1,3).unroll('x');

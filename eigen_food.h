@@ -17,11 +17,13 @@ public:
     virtual void train(const Dataset &filenames)
         {
 
-    			eigen_db_t db;
+    			eigen_database_table db;
+          //int k=db.width*db.height;
+          int k=80;
     			float **projections;
-    			vector<image_info> trainingset_info;
-    			vector<image_info> testingset_info;
-    			image_info img;
+    			vector<img_information> trainingset_info;
+    			vector<img_information> testingset_info;
+    			img_information img;
     			ofstream datafile;
     	        datafile.open("eigen_vector_train.dat");
 
@@ -38,17 +40,15 @@ public:
     	            {
     	            	names_of_training_images[i]=c_iter->second[i].c_str();
     	            }
-    	            eigen_build_db(names_of_training_images);
-    	            /* Load learned system from disk and allocate memory for new structures. */
-    	                eigen_load_db(&db);
-    	                eigen_load_info(&trainingset_info, db);
-    	                projections = eigen_load_vectors(db);
-    	                cout<<c_iter->second.size()<<endl;
-    	                cout<<names_of_training_images.size()<<endl;
+    	            build_eigen_databse(names_of_training_images);
+    	            // Load learned system from disk and allocate memory for new structures.
+    	                load_eigen_database(&db);
+    	                load_eigen_information(&trainingset_info, db);
+    	                projections = load_eigen_vectors(db,k);
     	                for (int j = 0; j < names_of_training_images.size(); j++)
     	                {
     	                datafile << target << " ";
-    	                for(int v=0;v<db.height * db.width;v++)
+    	                for(int v=0;v<k;v++)
     	                {
     	                	datafile << (v + 1) << ":" << projections[j][v] << " ";
     	                }
@@ -66,21 +66,22 @@ public:
 
   virtual string classify(const string &filename) {
     cout<<"start"<<endl;
-    eigen_db_t db;
+    //int k=db.width*db.height;
+    int k=80;
+    eigen_database_table db;
     float **projections;
     ofstream datafile;
     int target = 1;
+    img_information img;
+    vector<img_information> testingset_info;
     datafile.open("eigen_vector_test.dat");
-    cout<<"eigen_build_db_test"<<endl;
-    eigen_build_db_test(filename);
-    cout<<"eigen_load_db"<<endl;
-    eigen_load_db(&db);
-    cout<<"eigen_load_vectors"<<endl;
-    projections = eigen_load_vectors(db);
-    cout<<"eigen_load_vectors_end"<<endl;
+    build_eigen_databse_test(filename);
+    
+    load_eigen_database(&db);
+    projections = load_eigen_vectors(db,k);
     for (int j = 0; j < 1; j++) {
       datafile << target << " ";
-      for (int v = 0; v < db.height * db.width; v++) {
+      for (int v = 0; v < k; v++) {
         datafile << (v + 1) << ":" << projections[j][v] << " ";
       }
       datafile << "\n";
@@ -99,7 +100,9 @@ public:
     ifstream outputfile("eigen_test_output.txt");
     while (std::getline(outputfile, str)) {
       int index = str.find(" ");
-      int c_index = stoi(str.substr(0, index));
+      string p=str.substr(0,index);
+      int c_index=atoi(p.c_str());
+      //int c_index = atoi(str.substr(0, index));
       // cout<<class_list[c_index-1]<<endl;
       output_label = class_list[c_index - 1];
       //cout<<str<<endl;
