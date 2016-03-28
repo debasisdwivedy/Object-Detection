@@ -156,7 +156,7 @@ public:
             // Load each test image, convert to grayscale and compute SIFT descriptors.
             CImg<double> input_image(filename.c_str());
             CImg<double> gray = input_image.get_RGBtoHSI().get_channel(2);
-            gray.resize(imgsize,imgsize,1,1);
+            //gray.resize(imgsize,imgsize,1,1);
             vector <SiftDescriptor> descriptors = Sift::compute_sift(gray);
 
             for (int j = 0; j < descriptors.size(); j++)
